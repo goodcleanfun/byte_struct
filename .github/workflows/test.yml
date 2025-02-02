@@ -1,0 +1,100 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  test-ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-gnutls-dev
+      - name: Set up ${{ matrix.compiler }}
+        run: |
+          if [ "${{ matrix.compiler }}" == "clang" ]; then
+            sudo apt-get install -y clang;
+          fi
+      - name: Install clib
+        run: |
+          git clone https://github.com/clibs/clib.git
+          cd clib
+          make
+          sudo make install
+      - name: Run tests
+        run: make CC=${{ matrix.compiler }} install test
+
+  test-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: brew install curl
+      - name: Install ${{ matrix.compiler }}
+        run: |
+          if [ "${{ matrix.compiler }}" == "gcc" ]; then
+            brew install gcc;
+          fi
+      - name: Install clib
+        run: |
+          git clone https://github.com/clibs/clib.git
+          cd clib
+          make CC=${{ matrix.compiler }}
+          sudo make install
+      - name: Run tests with ${{ matrix.compiler }}
+        run: make CC=${{ matrix.compiler }} install test
+
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Install dependencies
+        run: |
+          choco install make
+          choco install curl
+      - name: Install greatest
+        run: |
+          mkdir -p deps\greatest
+          curl -L https://github.com/silentbicycle/greatest/raw/release/greatest.h -o deps\greatest\greatest.h
+          mkdir -p deps\byte_order
+          curl -L https://raw.githubusercontent.com/goodcleanfun/byte_order/refs/heads/main/src/byte_order.h -o deps\byte_order\byte_order.h
+          mkdir -p deps\lex_order
+          curl -L https://raw.githubusercontent.com/goodcleanfun/lex_order/refs/heads/main/src/lex_order.h -o deps\lex_order\lex_order.h
+      - name: Run tests with MSVC
+        run: make CC=cl test
+
+  test-windows-mingw:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify GCC Version
+        run: |
+          gcc --version
+      - name: Install curl
+        run: |
+          choco install curl -y
+      - name: Download greatest.h
+        run: |
+          mkdir -p deps/greatest
+          curl -L https://github.com/silentbicycle/greatest/raw/release/greatest.h -o deps/greatest/greatest.h
+          mkdir -p deps/byte_order
+          curl -L https://raw.githubusercontent.com/goodcleanfun/byte_order/refs/heads/main/src/byte_order.h -o deps/byte_order/byte_order.h
+          mkdir -p deps/lex_order
+          curl -L https://raw.githubusercontent.com/goodcleanfun/lex_order/refs/heads/main/src/lex_order.h -o deps/lex_order/lex_order.h
+          make CC=gcc test
