@@ -57,57 +57,47 @@ typedef struct byte_struct {
 } byte_struct_t;
 
 static bool byte_struct_type_and_size(char c, byte_struct_type_t *type, size_t *size) {
-    switch (c) {
-        case BYTE_STRUCT_FORMAT_CHAR:
-            *size = sizeof(char);
-            *type = BYTE_STRUCT_TYPE_CHAR;
-            return true;
-        case BYTE_STRUCT_FORMAT_INT8:
-            *size =  sizeof(int8_t);
-            *type = BYTE_STRUCT_TYPE_INT8;
-            return true;
-        case BYTE_STRUCT_FORMAT_UINT8:
-            *size = sizeof(uint8_t);
-            *type = BYTE_STRUCT_TYPE_UINT8;
-            return true;
-        case BYTE_STRUCT_FORMAT_INT16:
-            *size = sizeof(int16_t);
-            *type = BYTE_STRUCT_TYPE_INT16;
-        case BYTE_STRUCT_FORMAT_UINT16:
-            *size = sizeof(uint16_t);
-            *type = BYTE_STRUCT_TYPE_UINT16;
-            return true;
-        case BYTE_STRUCT_FORMAT_INT32:
-            *size = sizeof(int32_t);
-            *type = BYTE_STRUCT_TYPE_INT32;
-            return true;
-        case BYTE_STRUCT_FORMAT_UINT32:
-            *size = sizeof(uint32_t);
-            *type = BYTE_STRUCT_TYPE_UINT32;
-            return true;
-        case BYTE_STRUCT_FORMAT_INT64:
-            *size = sizeof(int64_t);
-            *type = BYTE_STRUCT_TYPE_INT64;
-            return true;
-        case BYTE_STRUCT_FORMAT_UINT64:
-            *size = sizeof(uint64_t);
-            *type = BYTE_STRUCT_TYPE_UINT64;
-            return true;
-        case BYTE_STRUCT_FORMAT_FLOAT:
-            *size = sizeof(float);
-            *type = BYTE_STRUCT_TYPE_FLOAT;
-            return true;
-        case BYTE_STRUCT_FORMAT_DOUBLE:
-            *size = sizeof(double);
-            *type = BYTE_STRUCT_TYPE_DOUBLE;
-            return true;
-        case BYTE_STRUCT_FORMAT_PTR:
-            *size = sizeof(void *);
-            *type = BYTE_STRUCT_TYPE_PTR;
-            return true;
-        default:
-            return false;
+    if (c == BYTE_STRUCT_FORMAT_CHAR) {
+        *size = sizeof(char);
+        *type = BYTE_STRUCT_TYPE_CHAR;
+    } else if (c == BYTE_STRUCT_FORMAT_INT8) {
+        *size =  sizeof(int8_t);
+        *type = BYTE_STRUCT_TYPE_INT8;
+    } else if (c == BYTE_STRUCT_FORMAT_UINT8) {
+        *size = sizeof(uint8_t);
+        *type = BYTE_STRUCT_TYPE_UINT8;
+    } else if (c == BYTE_STRUCT_FORMAT_INT16) {
+        *size = sizeof(int16_t);
+        *type = BYTE_STRUCT_TYPE_INT16;
+    } else if (c == BYTE_STRUCT_FORMAT_UINT16) {
+        *size = sizeof(uint16_t);
+        *type = BYTE_STRUCT_TYPE_UINT16;
+    } else if (c == BYTE_STRUCT_FORMAT_INT32) {
+        *size = sizeof(int32_t);
+        *type = BYTE_STRUCT_TYPE_INT32;
+    } else if (c == BYTE_STRUCT_FORMAT_UINT32) {
+        *size = sizeof(uint32_t);
+        *type = BYTE_STRUCT_TYPE_UINT32;
+    } else if (c == BYTE_STRUCT_FORMAT_INT64) {
+        *size = sizeof(int64_t);
+        *type = BYTE_STRUCT_TYPE_INT64;
+    } else if (c == BYTE_STRUCT_FORMAT_UINT64) {
+        *size = sizeof(uint64_t);
+        *type = BYTE_STRUCT_TYPE_UINT64;
+    } else if (c == BYTE_STRUCT_FORMAT_FLOAT) {
+        *size = sizeof(float);
+        *type = BYTE_STRUCT_TYPE_FLOAT;
+    } else if (c == BYTE_STRUCT_FORMAT_DOUBLE) {
+        *size = sizeof(double);
+        *type = BYTE_STRUCT_TYPE_DOUBLE;
+    } else if (c == BYTE_STRUCT_FORMAT_PTR) {
+        *size = sizeof(void *);
+        *type = BYTE_STRUCT_TYPE_PTR;
+    } else {
+        return false;
     }
+
+    return true;
 }
 
 static byte_struct_t *byte_struct_new_len_options(const char *format, size_t len, byte_order_t byte_order) {
