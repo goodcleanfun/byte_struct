@@ -1,0 +1,19 @@
+{
+    "name": "byte_struct",
+    "version": "0.0.0",
+    "repo": "goodcleanfun/byte_struct",
+    "description": "A contiguous-memory runtime struct using byte offsets, for constructing e.g. multidimensional keys, tuples with more than one type",
+    "keywords": [],
+    "license": "MIT",
+    "dependencies": {
+        "goodcleanfun/byte_order": "*",
+        "goodcleanfun/lex_order": "*"
+    },
+    "development": {
+      "silentbicycle/greatest": "*"
+    },
+    "src": [
+      "src/byte_struct.h"
+    ]
+    
+  }
