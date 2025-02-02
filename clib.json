@@ -1,6 +1,6 @@
 {
     "name": "byte_struct",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "repo": "goodcleanfun/byte_struct",
     "description": "A contiguous-memory runtime struct using byte offsets, for constructing e.g. multidimensional keys, tuples with more than one type",
     "keywords": [],
