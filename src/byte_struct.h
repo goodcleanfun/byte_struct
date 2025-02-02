@@ -8,18 +8,33 @@
 
 #include "lex_order/lex_order.h"
 
-static const char BYTE_STRUCT_TYPE_CHAR = 'c';
-static const char BYTE_STRUCT_TYPE_INT8 = 'b';
-static const char BYTE_STRUCT_TYPE_UINT8 = 'B';
-static const char BYTE_STRUCT_TYPE_INT16 = 'h';
-static const char BYTE_STRUCT_TYPE_UINT16 = 'H';
-static const char BYTE_STRUCT_TYPE_INT32 = 'i';
-static const char BYTE_STRUCT_TYPE_UINT32 = 'I';
-static const char BYTE_STRUCT_TYPE_INT64 = 'l';
-static const char BYTE_STRUCT_TYPE_UINT64 = 'L';
-static const char BYTE_STRUCT_TYPE_FLOAT = 'f';
-static const char BYTE_STRUCT_TYPE_DOUBLE = 'd';
-static const char BYTE_STRUCT_TYPE_PTR = 'p';
+static const char BYTE_STRUCT_FORMAT_CHAR = 'c';
+static const char BYTE_STRUCT_FORMAT_INT8 = 'b';
+static const char BYTE_STRUCT_FORMAT_UINT8 = 'B';
+static const char BYTE_STRUCT_FORMAT_INT16 = 'h';
+static const char BYTE_STRUCT_FORMAT_UINT16 = 'H';
+static const char BYTE_STRUCT_FORMAT_INT32 = 'i';
+static const char BYTE_STRUCT_FORMAT_UINT32 = 'I';
+static const char BYTE_STRUCT_FORMAT_INT64 = 'l';
+static const char BYTE_STRUCT_FORMAT_UINT64 = 'L';
+static const char BYTE_STRUCT_FORMAT_FLOAT = 'f';
+static const char BYTE_STRUCT_FORMAT_DOUBLE = 'd';
+static const char BYTE_STRUCT_FORMAT_PTR = 'p';
+
+typedef enum {
+    BYTE_STRUCT_TYPE_CHAR,
+    BYTE_STRUCT_TYPE_INT8,
+    BYTE_STRUCT_TYPE_UINT8,
+    BYTE_STRUCT_TYPE_INT16,
+    BYTE_STRUCT_TYPE_UINT16,
+    BYTE_STRUCT_TYPE_INT32,
+    BYTE_STRUCT_TYPE_UINT32,
+    BYTE_STRUCT_TYPE_INT64,
+    BYTE_STRUCT_TYPE_UINT64,
+    BYTE_STRUCT_TYPE_FLOAT,
+    BYTE_STRUCT_TYPE_DOUBLE,
+    BYTE_STRUCT_TYPE_PTR
+} byte_struct_type_t;
 
 typedef enum {
     BYTE_STRUCT_BIG_ENDIAN,
@@ -31,7 +46,7 @@ typedef enum {
 typedef struct type_offset {
     size_t offset;
     size_t count;
-    char type;
+    byte_struct_type_t type;
 } type_offset_t;
 
 typedef struct byte_struct {
@@ -41,34 +56,57 @@ typedef struct byte_struct {
     type_offset_t type_offsets[];
 } byte_struct_t;
 
-static size_t byte_struct_type_size(char type) {
-    switch (type) {
-        case BYTE_STRUCT_TYPE_CHAR:
-            return sizeof(char);
-        case BYTE_STRUCT_TYPE_INT8:
-            return sizeof(int8_t);
-        case BYTE_STRUCT_TYPE_UINT8:
-            return sizeof(uint8_t);
-        case BYTE_STRUCT_TYPE_INT16:
-            return sizeof(int16_t);
-        case BYTE_STRUCT_TYPE_UINT16:
-            return sizeof(uint16_t);
-        case BYTE_STRUCT_TYPE_INT32:
-            return sizeof(int32_t);
-        case BYTE_STRUCT_TYPE_UINT32:
-            return sizeof(uint32_t);
-        case BYTE_STRUCT_TYPE_INT64:
-            return sizeof(int64_t);
-        case BYTE_STRUCT_TYPE_UINT64:
-            return sizeof(uint64_t);
-        case BYTE_STRUCT_TYPE_FLOAT:
-            return sizeof(float);
-        case BYTE_STRUCT_TYPE_DOUBLE:
-            return sizeof(double);
-        case BYTE_STRUCT_TYPE_PTR:
-            return sizeof(void *);
+static bool byte_struct_type_and_size(char c, byte_struct_type_t *type, size_t *size) {
+    switch (c) {
+        case BYTE_STRUCT_FORMAT_CHAR:
+            *size = sizeof(char);
+            *type = BYTE_STRUCT_TYPE_CHAR;
+            return true;
+        case BYTE_STRUCT_FORMAT_INT8:
+            *size =  sizeof(int8_t);
+            *type = BYTE_STRUCT_TYPE_INT8;
+            return true;
+        case BYTE_STRUCT_FORMAT_UINT8:
+            *size = sizeof(uint8_t);
+            *type = BYTE_STRUCT_TYPE_UINT8;
+            return true;
+        case BYTE_STRUCT_FORMAT_INT16:
+            *size = sizeof(int16_t);
+            *type = BYTE_STRUCT_TYPE_INT16;
+        case BYTE_STRUCT_FORMAT_UINT16:
+            *size = sizeof(uint16_t);
+            *type = BYTE_STRUCT_TYPE_UINT16;
+            return true;
+        case BYTE_STRUCT_FORMAT_INT32:
+            *size = sizeof(int32_t);
+            *type = BYTE_STRUCT_TYPE_INT32;
+            return true;
+        case BYTE_STRUCT_FORMAT_UINT32:
+            *size = sizeof(uint32_t);
+            *type = BYTE_STRUCT_TYPE_UINT32;
+            return true;
+        case BYTE_STRUCT_FORMAT_INT64:
+            *size = sizeof(int64_t);
+            *type = BYTE_STRUCT_TYPE_INT64;
+            return true;
+        case BYTE_STRUCT_FORMAT_UINT64:
+            *size = sizeof(uint64_t);
+            *type = BYTE_STRUCT_TYPE_UINT64;
+            return true;
+        case BYTE_STRUCT_FORMAT_FLOAT:
+            *size = sizeof(float);
+            *type = BYTE_STRUCT_TYPE_FLOAT;
+            return true;
+        case BYTE_STRUCT_FORMAT_DOUBLE:
+            *size = sizeof(double);
+            *type = BYTE_STRUCT_TYPE_DOUBLE;
+            return true;
+        case BYTE_STRUCT_FORMAT_PTR:
+            *size = sizeof(void *);
+            *type = BYTE_STRUCT_TYPE_PTR;
+            return true;
         default:
-            return 0;
+            return false;
     }
 }
 
@@ -98,23 +136,22 @@ static byte_struct_t *byte_struct_new_len_options(const char *format, size_t len
             i = j;
             prev_was_type = false;
         } else {
-            switch(format[i]) {
-                case BYTE_STRUCT_TYPE_CHAR:
-                case BYTE_STRUCT_TYPE_INT8:
-                case BYTE_STRUCT_TYPE_UINT8:
-                case BYTE_STRUCT_TYPE_INT16:
-                case BYTE_STRUCT_TYPE_UINT16:
-                case BYTE_STRUCT_TYPE_INT32:
-                case BYTE_STRUCT_TYPE_UINT32:
-                case BYTE_STRUCT_TYPE_INT64:
-                case BYTE_STRUCT_TYPE_UINT64:
-                case BYTE_STRUCT_TYPE_FLOAT:
-                case BYTE_STRUCT_TYPE_DOUBLE:
-                case BYTE_STRUCT_TYPE_PTR:
+            char c = format[i];
+            if ((c == BYTE_STRUCT_FORMAT_CHAR) ||
+                (c == BYTE_STRUCT_FORMAT_INT8) ||
+                (c == BYTE_STRUCT_FORMAT_UINT8) ||
+                (c == BYTE_STRUCT_FORMAT_INT16) ||
+                (c == BYTE_STRUCT_FORMAT_UINT16) ||
+                (c == BYTE_STRUCT_FORMAT_INT32) ||
+                (c == BYTE_STRUCT_FORMAT_UINT32) ||
+                (c == BYTE_STRUCT_FORMAT_INT64) ||
+                (c == BYTE_STRUCT_FORMAT_UINT64) ||
+                (c == BYTE_STRUCT_FORMAT_FLOAT) ||
+                (c == BYTE_STRUCT_FORMAT_DOUBLE) ||
+                (c == BYTE_STRUCT_FORMAT_PTR)) {
                     num_fields++;
-                    break;
-                default:
-                    return NULL;
+            } else {
+                return NULL;
             }
             prev_was_type = true;
         }
@@ -134,7 +171,8 @@ static byte_struct_t *byte_struct_new_len_options(const char *format, size_t len
     const size_t max_array_mod_10 = SIZE_MAX % 10;
 
     i = 0;
-    char type = '\0';
+    char format_type = '\0';
+    byte_struct_type_t type;
 
     size_t count = 1;
 
@@ -168,8 +206,12 @@ static byte_struct_t *byte_struct_new_len_options(const char *format, size_t len
             }
             i = j + 1;
         } else {
-            type = format[i];
-            size_t type_size = byte_struct_type_size(type);
+            format_type = format[i];
+            size_t type_size = 0;
+            if (!byte_struct_type_and_size(format_type, &type, &type_size)) {
+                free(s);
+                return NULL;
+            }
             if (SIZE_MAX - total_size < type_size) {
                 free(s);
                 return NULL;
